@@ -2,6 +2,8 @@ import requests
 import os
 import json
 import matplotlib.pyplot as plt
+import tkinter as tk
+from tkinter import scrolledtext, messagebox
 
 clientId = "9b8b018d-77bc-4af6-8965-cc422d67be58"
 secretId= "G4VH4kaXL1UCat7mp3Uxjy26UJ76fRK5meJ7Rc46"
@@ -121,6 +123,24 @@ def get_data(query: str, **kwargs):
         else:
             print(f"Request failed with status code {response.status_code}")
             return None
+def get_report_and_display():
+    # Get the raid code from the entry widget
+    raid_code = raid_code_entry.get()
+    
+    # Retrieve the raid report data
+    raid_report_response = get_raid_report(raid_code)
+    
+    if raid_report_response:
+        # Format the raid report data
+        formatted_report = format_raid_report(raid_report_response)
+        
+        # Clear the text area and display the formatted report
+        report_text_area.delete("1.0", tk.END)
+        report_text_area.insert(tk.END, formatted_report)
+    else:
+        # Display an error message if retrieval fails
+        messagebox.showerror("Error", "Failed to retrieve raid report data.")
+
 """def count_wipes_per_boss(response):
     wipes_count = {}
 
@@ -171,3 +191,27 @@ def main():
     #wipes_count_per_boss = count_wipes_per_boss(raid_report_response)
     #plot_wipes_per_boss(wipes_count_per_boss)
 if __name__ == "__main__": main()
+root = tk.Tk()
+root.title("Warcraft Logs Raid Report Viewer")
+
+# Create a frame to hold the entry widget and button
+input_frame = tk.Frame(root)
+input_frame.pack(pady=10)
+
+# Create an entry widget to input the raid code
+raid_code_label = tk.Label(input_frame, text="Enter Raid Code:")
+raid_code_label.grid(row=0, column=0, padx=10)
+
+raid_code_entry = tk.Entry(input_frame, width=20)
+raid_code_entry.grid(row=0, column=1, padx=10)
+
+# Create a button to fetch and display the raid report
+fetch_button = tk.Button(input_frame, text="Fetch Report", command=get_report_and_display)
+fetch_button.grid(row=0, column=2, padx=10)
+
+# Create a scrolled text widget to display the raid report
+report_text_area = scrolledtext.ScrolledText(root, width=80, height=30, wrap=tk.WORD)
+report_text_area.pack(padx=10, pady=10)
+
+# Run the Tkinter event loop
+root.mainloop()
